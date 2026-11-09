@@ -1,0 +1,369 @@
+/* =====================================================================
+   Breast Cancer Survey – seed data, questionnaire version 1.0
+   Source: Arabic questionnaire (binding).
+   ===================================================================== */
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+
+DECLARE @v BIGINT;
+
+/* ---------- 1. Questionnaire version ---------- */
+INSERT INTO dbo.breast_cancer_questionnaire_version
+    (version_no, intro_text_ar, intro_text_en, thank_you_ar, thank_you_en, info_link_url, approved_at, is_active)
+VALUES
+(N'1.0',
+ -- [CHECK] Arabic intro not in source PDF – translation pending approval
+ N'شكراً لكِ على إتاحة الفرصة لمشاركتنا تجاربك وآرائك، ولدعمك لمهمتنا في الوقاية من السرطان. يمكنكِ الاطلاع على مزيد من المعلومات حول الكشف المبكر عن السرطان وخدمات الفحص التي تقدمها وزارة الصحة عبر الرابط في نهاية الاستبيان.',
+ N'Thank you for taking this opportunity to share your experiences and views with us, and for supporting us in our cancer prevention mission. You can find more information on cancer screening, and the screening services offered by the Ministry of Health via a link at the end of the survey.',
+ -- [CHECK] Arabic thank-you not in source PDF
+ N'شكراً لكِ على إكمال الاستبيان. لمزيد من المعلومات حول الكشف المبكر عن السرطان وخطط وزارة الصحة لتحسين خدمات الفحص، يرجى الضغط على الرابط أدناه.',
+ N'Thank you for completing the survey. For more information about cancer screening and the Ministry of Health''s plans to improve screening services, please use the link below.',
+ N'https://www.moh.gov.kw/PHS/PHA/BreastCancerScreening.pdf',
+ NULL,          -- set when Public Health approves
+ 1);
+
+SET @v = SCOPE_IDENTITY();
+
+/* ---------- 2. Campaign ---------- */
+INSERT INTO dbo.breast_cancer_campaign (code, name_ar, name_en, version_id, status, start_date, end_date)
+VALUES (N'BC-2026', N'حملة الكشف المبكر عن سرطان الثدي 2026', N'Breast Cancer Early Screening Campaign 2026',
+        @v, N'OPEN', SYSDATETIME(), NULL);
+
+/* ---------- 3. Steps ---------- */
+INSERT INTO dbo.breast_cancer_survey_step
+    (version_id, step_no, section_code, title_ar, title_en, button_label_ar, button_label_en, is_intro_step, is_review_step)
+VALUES
+(@v,  1, N'INTRO',        N'استبيان الكشف المبكر عن سرطان الثدي', N'Breast Cancer Early Screening Survey', N'ابدأ', N'Start', 1, 0),
+(@v,  2, N'DEMOGRAPHICS', N'الأسئلة الديموغرافية والاجتماعية', N'Sociodemographic Questions', N'التالي', N'Next', 0, 0),
+(@v,  3, N'HEALTH',       N'الأسئلة المتعلقة بالصحة العامة', N'Health-Related Questions', N'التالي', N'Next', 0, 0),
+(@v,  4, N'MAMMOGRAM',    N'الفحص المبكر لسرطان الثدي - أشعة الماموجرام', N'Breast Cancer Screening - Mammograms', N'التالي', N'Next', 0, 0),
+(@v,  5, N'MAMMOGRAM',    N'الفحص المبكر لسرطان الثدي - أشعة الماموجرام', N'Breast Cancer Screening - Mammograms', N'التالي', N'Next', 0, 0),
+(@v,  6, N'BSE',          N'الفحص الذاتي للثدي (BSE)', N'Breast Self-Examination (BSE)', N'التالي', N'Next', 0, 0),
+(@v,  7, N'BSE',          N'الفحص الذاتي للثدي (BSE)', N'Breast Self-Examination (BSE)', N'التالي', N'Next', 0, 0),
+(@v,  8, N'HISTORY',      N'التاريخ الشخصي والعائلي لسرطان الثدي', N'Personal and Family History of Breast Cancer', N'التالي', N'Next', 0, 0), -- [EN TRANSLATED]
+(@v,  9, N'HISTORY',      N'التاريخ الشخصي والعائلي لسرطان الثدي', N'Personal and Family History of Breast Cancer', N'التالي', N'Next', 0, 0),
+(@v, 10, N'HISTORY',      N'التاريخ الشخصي والعائلي لسرطان الثدي', N'Personal and Family History of Breast Cancer', N'التالي', N'Next', 0, 0),
+(@v, 11, N'ATTITUDES',    N'المواقف تجاه الفحص المبكر لسرطان الثدي', N'Attitudes about Breast Cancer Screening', N'التالي', N'Next', 0, 0),
+(@v, 12, N'PROGRAM',      N'المعرفة بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت', N'Knowledge of the Kuwait National Mammography Screening Program', N'التالي', N'Next', 0, 0),
+(@v, 13, N'PROGRAM',      N'المعرفة بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت', N'Knowledge of the Kuwait National Mammography Screening Program', N'التالي', N'Next', 0, 0),
+(@v, 14, N'PROGRAM',      N'المعرفة بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت', N'Knowledge of the Kuwait National Mammography Screening Program', N'التالي', N'Next', 0, 0),
+(@v, 15, N'PROGRAM',      N'المعرفة بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت', N'Knowledge of the Kuwait National Mammography Screening Program', N'التالي', N'Next', 0, 0),
+(@v, 16, N'PROGRAM',      N'المعرفة بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت', N'Knowledge of the Kuwait National Mammography Screening Program', N'التالي', N'Next', 0, 0),
+(@v, 17, N'CONTACT',      N'معلومات التواصل', N'Contact Details', N'التالي', N'Next', 0, 0),
+(@v, 18, N'REVIEW',       N'مراجعة الإجابات وتأكيد الإرسال', N'Review and Submit', N'إرسال', N'Submit', 0, 1);
+
+UPDATE dbo.breast_cancer_survey_step
+   SET hint_ar = N'يرجى اختيار مستوى موافقتك على العبارات التالية',
+       hint_en = N'Please rate the following statements (1: Strongly disagree, 5: Strongly agree)'
+ WHERE version_id = @v AND step_no = 11;
+
+UPDATE dbo.breast_cancer_survey_step
+   SET hint_ar = N'يرجى تزويدنا برقم الهاتف أو البريد الإلكتروني الذي ترغبين في تواصلنا معكِ من خلاله',
+       hint_en = N'Please provide the phone number or email you would like us to contact you through'
+ WHERE version_id = @v AND step_no = 17;
+
+/* ---------- 4. Questions ---------- */
+CREATE TABLE #q (
+    step_no INT, code NVARCHAR(50), ord INT, control_type NVARCHAR(30),
+    is_required BIT, prefill NVARCHAR(50), label_ar NVARCHAR(1000), label_en NVARCHAR(1000));
+
+INSERT INTO #q (step_no, code, ord, control_type, is_required, prefill, label_ar, label_en) VALUES
+-- ===== Step 2: Sociodemographic (A1-A4, A8 = "available on Sahel" → read-only prefill) =====
+( 2, N'A1',  1, N'Text',     1, N'SAHEL_AGE',            N'العمر', N'Age'),
+( 2, N'A2',  2, N'Radio',    1, N'SAHEL_MARITAL_STATUS', N'الحالة الاجتماعية', N'Marital status'),
+( 2, N'A3',  3, N'Radio',    1, N'SAHEL_HAS_CHILDREN',   N'هل لديك أطفال؟', N'Do you have any children?'),
+( 2, N'A4',  4, N'Radio',    1, N'SAHEL_NATIONALITY',    N'الجنسية', N'Nationality'),
+( 2, N'A5',  5, N'Radio',    1, NULL, N'الحالة الوظيفية', N'Employment status'),
+( 2, N'A6',  6, N'Radio',    1, NULL, N'هل تعملين في المجال الصحي؟ (طبيب، ممرض، إلخ)', N'Are you a healthcare professional? (i.e. physician, nurse, etc.)'),
+( 2, N'A7',  7, N'Radio',    1, NULL, N'هل لديك أحد من أفراد الأسرة يعمل في المجال الصحي؟', N'Do you have a family member who is a healthcare professional?'),
+( 2, N'A8',  8, N'Dropdown', 1, N'SAHEL_GOVERNORATE',    N'في أي محافظة تسكنين؟', N'In which governorate do you live?'),
+( 2, N'A9',  9, N'Radio',    1, NULL, N'ما هو أعلى مؤهل علمي حصلت عليه؟', N'What is your highest educational degree?'),
+( 2, N'A10',10, N'Radio',    1, NULL, N'ما هو دخلك الشهري؟', N'What is your monthly income?'),
+
+-- ===== Step 3: Health-related =====
+( 3, N'A11', 1, N'Radio',        1, NULL, N'هل تعاني من أي أمراض مزمنة؟ (مثل السكري، ضغط الدم، أمراض القلب، الكوليسترول، إلخ)', N'Do you have any chronic diseases? (i.e. diabetes, high blood pressure, heart disease, high cholesterol, etc.)'),
+( 3, N'A12', 2, N'Dropdown',     1, NULL, N'كيف تقيم حالتك الصحية على مقياس من 0 إلى 10؟ (حيث يعني الصفر "أعاني من مشاكل صحية كبيرة" و10 يعني "أتمتع بصحة ممتازة")', N'How would you rate your health on a scale of 0 to 10? (with zero being "I have major health problems" and 10 being "I''m completely healthy")'),
+( 3, N'A13', 3, N'CheckBoxList', 1, NULL, N'ما الذي تفعله للحفاظ على صحتك؟ (يمكن اختيار أكثر من إجابة)', N'What do you do to stay healthy? (Select all that apply)'),
+( 3, N'A14', 4, N'CheckBoxList', 1, NULL, N'من أين تحصل عادةً على المعلومات المتعلقة بالصحة والحالات الطبية؟ (اختر كل ما ينطبق)', N'Where do you usually get information about health and medical conditions? (Select all that apply)'),
+( 3, N'A15', 5, N'Radio',        1, NULL, N'كم مرة تذهبين إلى الطبيب لإجراء فحص طبي عام؟', N'How often do you go to the doctor for a health check-up?'),
+( 3, N'A16', 6, N'CheckBoxList', 1, NULL, N'ما الذي قد يدفعك لإجراء فحص طبي عام؟', N'What would prompt you to go for a health check-up? (Select all that apply)'),  -- [CHECK] multi-select per EN; AR silent
+( 3, N'A16_OTHER', 7, N'Text',  0, NULL, N'أسباب أخرى - يرجى الكتابة', N'Other - please state'),
+( 3, N'A17', 8, N'Radio',        1, NULL, N'هل سبق أن تم تشخيصك بمرض السرطان؟', N'Have you ever been diagnosed with cancer?'),
+( 3, N'A18', 9, N'Radio',        1, NULL, N'هل لديك تاريخ عائلي للإصابة بالسرطان؟', N'Do you have a family history of cancer?'),
+( 3, N'A19',10, N'Radio',        1, NULL, N'هل تعرفين أي شخص تم تشخيصه بالسرطان؟ (فرد من العائلة، صديق، زميل عمل، إلخ)', N'Do you know anyone who has been diagnosed with cancer? (Family member, friend, colleague, etc.)'),
+
+-- ===== Step 4-5: Mammograms =====
+( 4, N'B1', 1, N'Radio',        1, NULL, N'هل سبق أن أوصاك الطبيب بإجراء أشعة الماموجرام؟', N'Did your doctor ever recommend that you do a mammogram?'),
+( 4, N'B2', 2, N'Radio',        1, NULL, N'هل قمتِ بإجراء أشعة الماموجرام من قبل؟', N'Have you ever done a mammogram?'),
+( 5, N'B3', 1, N'CheckBoxList', 1, NULL, N'إذا كانت إجابتك "نعم" على السؤال السابق، ما الذي دفعك لإجراء أشعة الماموجرام؟', N'If you answered "yes" to the previous question, what made you do a mammogram? (Select all that apply)'),
+( 5, N'B4', 2, N'Radio',        1, NULL, N'إذا كانت إجابتك "لا" على السؤال الثاني، ما الذي منعك من إجراء أشعة الماموجرام؟', N'If you answered "no" to question 2, what made you not do a mammogram?'),
+
+-- ===== Step 6-7: Breast self-examination =====
+( 6, N'B5', 1, N'Radio',        1, NULL, N'هل لديك معرفة بفحص الثدي الذاتي؟', N'Are you familiar with the breast self-examination?'),
+( 7, N'B6', 1, N'Radio',        1, NULL, N'هل تعرفين كيفية القيام بالفحص الذاتي للثدي؟', N'Do you know how to perform the breast self-examination?'),
+( 7, N'B7', 2, N'Radio',        1, NULL, N'كم مرة تقومين بإجراء الفحص الذاتي للثدي؟', N'How often do you perform the breast self-examination?'),
+( 7, N'B8', 3, N'Radio',        1, NULL, N'في أي عمر يجب على المرأة البدء في إجراء الفحص الذاتي للثدي؟', N'At what age should women start performing the breast self-examination?'),
+( 7, N'B9', 4, N'CheckBoxList', 1, NULL, N'أين تعلمت كيفية إجراء الفحص الذاتي للثدي؟', N'Where did you learn about the breast self-examination? (Select all that apply)'),
+
+-- ===== Step 8-10: Personal & family history (AR only – EN TRANSLATED) =====
+( 8, N'B10', 1, N'Radio', 1, NULL, N'هل سبق أن تم تشخيصك بسرطان الثدي؟', N'Have you ever been diagnosed with breast cancer?'),
+( 9, N'B11', 1, N'Radio', 1, NULL, N'إذا كانت الإجابة نعم على السؤال العاشر، كيف تم اكتشاف السرطان لأول مرة؟', N'If you answered yes to question 10, how was the cancer first detected?'),
+(10, N'B12', 1, N'Radio', 1, NULL, N'هل لديك تاريخ عائلي للإصابة بسرطان الثدي؟', N'Do you have a family history of breast cancer?'),
+(10, N'B13', 2, N'Radio', 1, NULL, N'هل لديك صديقة أصيبت بسرطان الثدي؟', N'Do you have a friend who has had breast cancer?'),
+
+-- ===== Step 11: Attitudes (5-point scale) =====
+(11, N'B14', 1, N'Radio', 1, NULL, N'يجب على جميع الإناث إجراء الفحص المبكر لسرطان الثدي.', N'All females need to perform breast cancer screening.'),
+(11, N'B15', 2, N'Radio', 1, NULL, N'الفحص المبكر مهم لاكتشاف سرطان الثدي في مراحله الأولى.', N'Breast cancer screening is important to detect breast cancer early.'),
+(11, N'B16', 3, N'Radio', 1, NULL, N'الاكتشاف المبكر لسرطان الثدي يساعد في منع حدوث مضاعفات أخرى.', N'Early detection of breast cancer helps prevent further complications.'),
+(11, N'B17', 4, N'Radio', 1, NULL, N'النجاة من سرطان الثدي لا تعتمد على الاكتشاف المبكر.', N'Breast cancer survival does not depend on early detection.'),
+(11, N'B18', 5, N'Radio', 1, NULL, N'الفحص الذاتي للثدي لا يساعد في الكشف عن سرطان الثدي.', N'Breast self-examination does not help in detecting breast cancer.'),
+(11, N'B19', 6, N'Radio', 1, NULL, N'المرأة التي لديها تاريخ عائلي لسرطان الثدي لا داعي للقلق بشأن المرض.', N'A woman with a family history of breast cancer should not worry about breast cancer.'),
+
+-- ===== Step 12-16: National program =====
+(12, N'B20',  1, N'Radio', 1, NULL, N'هل أنتِ على دراية بالبرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت؟', N'Are you familiar with the Kuwait National Mammography Screening Program?'),
+(12, N'B20B', 2, N'Radio', 1, NULL, N'في أي عمر يتم استدعاء النساء لأول مرة لإجراء فحص سرطان الثدي في الكويت؟', N'At what age are women first invited for breast cancer screening in Kuwait?'),
+(12, N'B21',  3, N'Radio', 1, NULL, N'هل تعلمين أنه يمكنكِ حجز موعد لأشعة الماموجرام عبر تطبيقي "سهل" و"سالم"؟', N'Are you aware that you can schedule a mammogram through the Sahel and Salem applications?'),
+(13, N'B22',  1, N'Radio', 1, NULL, N'إذا كانت الإجابة نعم على السؤال السابق، هل سبق لكِ حجز موعد ماموجرام عبر تطبيق "سهل" أو "سالم"؟', N'If you answered yes to the previous question, have you ever scheduled a mammogram through the Sahel or Salem application?'),
+(14, N'B23',  1, N'Radio', 1, NULL, N'هل سبق لكِ إجراء أشعة الماموجرام من خلال البرنامج الوطني للكشف المبكر عن أمراض الثدي في الكويت؟', N'Have you ever done a mammogram through the Kuwait National Mammography Screening Program?'),
+(15, N'B24',  1, N'Radio', 1, NULL, N'إذا كانت إجابتك "نعم" على السؤال السابق، كيف عرفتِ عن هذا البرنامج؟', N'If you answered "yes" to the previous question, how did you find out about the program?'),
+(16, N'B25',  1, N'CheckBoxList', 1, NULL, N'كيف تفضلين معرفة المزيد عن سرطان الثدي وطرق الفحص المبكر؟ (يمكن اختيار أكثر من إجابة)', N'How would you like to learn more about breast cancer and breast cancer screening methods? (Select all that apply)'),
+(16, N'B26',  2, N'Text',  1, NULL, N'ما هي الطرق التي ترين أن وزارة الصحة يمكنها من خلالها تحسين البرنامج الوطني للكشف المبكر عن أمراض الثدي؟', N'In what ways do you think the Ministry of Health can improve the Kuwait National Mammography Screening Program?'),  -- [CHECK] required? form does not mark optional
+(16, N'B27',  3, N'Radio', 1, NULL, N'هل يمكننا الاتصال بكِ مستقبلاً لمساعدتنا في معرفة المزيد عن آرائك حول البرنامج الوطني للكشف المبكر عن أمراض الثدي؟', N'Can we contact you in the future to help us learn more about your views on the Kuwait National Mammography Screening Program?'),
+
+-- ===== Step 17: Contact details (B28 – one optional field per channel) =====
+(17, N'B28_EMAIL',    1, N'Text', 0, NULL, N'البريد الإلكتروني', N'Email'),
+(17, N'B28_PHONE',    2, N'Text', 0, NULL, N'الهاتف', N'Phone'),
+(17, N'B28_SMS',      3, N'Text', 0, NULL, N'الرسالة النصية', N'Text message'),
+(17, N'B28_WHATSAPP', 4, N'Text', 0, NULL, N'الواتساب', N'WhatsApp');
+
+INSERT INTO dbo.breast_cancer_question
+    (step_id, code, display_order, label_ar, label_en, control_type, is_required, is_disabled, prefill_source)
+SELECT s.step_id, q.code, q.ord, q.label_ar, q.label_en, q.control_type, q.is_required,
+       CASE WHEN q.prefill IS NULL THEN 0 ELSE 1 END, q.prefill
+FROM #q q
+JOIN dbo.breast_cancer_survey_step s ON s.version_id = @v AND s.step_no = q.step_no;
+
+/* ---- special field settings ---- */
+UPDATE qn SET max_length = 3
+FROM dbo.breast_cancer_question qn JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id
+WHERE s.version_id = @v AND qn.code = N'A1';
+
+UPDATE qn SET max_length = 200, hint_ar = N'في حال اختيار "أسباب أخرى"', hint_en = N'If you selected "Other"'
+FROM dbo.breast_cancer_question qn JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id
+WHERE s.version_id = @v AND qn.code = N'A16_OTHER';
+
+UPDATE qn SET is_multiline = 1, max_length = 1000
+FROM dbo.breast_cancer_question qn JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id
+WHERE s.version_id = @v AND qn.code = N'B26';
+
+UPDATE qn SET is_sensitive = 1, max_length = 100,
+       validation_regex = N'^[^@\s]+@[^@\s]+\.[^@\s]+$',
+       validation_msg_ar = N'البريد الإلكتروني غير صحيح', validation_msg_en = N'Invalid email address'
+FROM dbo.breast_cancer_question qn JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id
+WHERE s.version_id = @v AND qn.code = N'B28_EMAIL';
+
+UPDATE qn SET is_sensitive = 1, max_length = 8,
+       validation_regex = N'^[0-9]{8}$',
+       validation_msg_ar = N'يرجى إدخال رقم هاتف صحيح مكون من 8 أرقام', validation_msg_en = N'Please enter a valid 8-digit phone number'
+FROM dbo.breast_cancer_question qn JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id
+WHERE s.version_id = @v AND qn.code IN (N'B28_PHONE', N'B28_SMS', N'B28_WHATSAPP');
+
+/* ---------- 5. Options ---------- */
+CREATE TABLE #o (code NVARCHAR(50), value NVARCHAR(50), ord INT, text_ar NVARCHAR(500), text_en NVARCHAR(500), is_other BIT);
+
+-- Yes / No questions
+INSERT INTO #o (code, value, ord, text_ar, text_en, is_other)
+SELECT c.code, yn.value, yn.ord, yn.text_ar, yn.text_en, 0
+FROM (VALUES (N'A3'),(N'A6'),(N'A7'),(N'A11'),(N'A17'),(N'A18'),(N'A19'),
+             (N'B1'),(N'B2'),(N'B5'),(N'B6'),(N'B10'),(N'B12'),(N'B13'),
+             (N'B20'),(N'B21'),(N'B22'),(N'B23'),(N'B27')) c(code)
+CROSS JOIN (VALUES (N'1', 1, N'نعم', N'Yes'), (N'2', 2, N'لا', N'No')) yn(value, ord, text_ar, text_en);
+
+-- 5-point agreement scale (B14-B19)
+INSERT INTO #o (code, value, ord, text_ar, text_en, is_other)
+SELECT c.code, l.value, l.ord, l.text_ar, l.text_en, 0
+FROM (VALUES (N'B14'),(N'B15'),(N'B16'),(N'B17'),(N'B18'),(N'B19')) c(code)
+CROSS JOIN (VALUES (N'1', 1, N'معارض بشدة', N'Strongly disagree'),
+                   (N'2', 2, N'معارض',      N'Disagree'),
+                   (N'3', 3, N'غير متأكد',  N'Not sure'),
+                   (N'4', 4, N'موافق',      N'Agree'),
+                   (N'5', 5, N'موافق بشدة', N'Strongly agree')) l(value, ord, text_ar, text_en);
+
+-- Health rating 0-10 (A12)  [CHECK] text says 0-10, printed scale shows 1-10
+INSERT INTO #o (code, value, ord, text_ar, text_en, is_other)
+SELECT N'A12', CAST(n AS NVARCHAR(2)), n + 1, CAST(n AS NVARCHAR(2)), CAST(n AS NVARCHAR(2)), 0
+FROM (VALUES (0),(1),(2),(3),(4),(5),(6),(7),(8),(9),(10)) t(n);
+
+-- All other option lists
+INSERT INTO #o (code, value, ord, text_ar, text_en, is_other) VALUES
+-- A2 Marital status
+(N'A2', N'1', 1, N'عزباء',  N'Single',   0),
+(N'A2', N'2', 2, N'متزوجة', N'Married',  0),
+(N'A2', N'3', 3, N'مطلقة',  N'Divorced', 0),
+(N'A2', N'4', 4, N'أرملة',  N'Widowed',  0),
+-- A4 Nationality
+(N'A4', N'1', 1, N'كويتية',     N'Kuwaiti',     0),
+(N'A4', N'2', 2, N'غير كويتية', N'Non-Kuwaiti', 0),
+-- A5 Employment  [CHECK] EN source says "Unemployed"
+(N'A5', N'1', 1, N'موظفة',    N'Employed',  0),
+(N'A5', N'2', 2, N'ربة منزل', N'Homemaker', 0),
+(N'A5', N'3', 3, N'متقاعدة',  N'Retired',   0),
+-- A8 Governorate
+(N'A8', N'1', 1, N'الأحمدي',     N'Al-Ahmadi',       0),
+(N'A8', N'2', 2, N'العاصمة',     N'Al-Assimah',      0),
+(N'A8', N'3', 3, N'حولي',        N'Hawalli',         0),
+(N'A8', N'4', 4, N'مبارك الكبير', N'Mubarak Al-Kabeer', 0),
+(N'A8', N'5', 5, N'الفروانية',   N'Farwaniya',       0),
+(N'A8', N'6', 6, N'الجهراء',     N'Jahra',           0),
+-- A9 Education
+(N'A9', N'1', 1, N'دون الثانوية العامة',  N'Less than high school',   0),
+(N'A9', N'2', 2, N'شهادة الثانوية العامة', N'High school diploma',     0),
+(N'A9', N'3', 3, N'دبلوم (معهد سنتين)',    N'Diploma (2-year college)', 0),
+(N'A9', N'4', 4, N'درجة البكالوريوس',      N'Bachelor''s degree',      0),
+(N'A9', N'5', 5, N'دراسات عليا',           N'Graduate degree',         0),
+-- A10 Income
+(N'A10', N'1', 1, N'أقل من 500 دينار كويتي',     N'Less than 500 KD', 0),
+(N'A10', N'2', 2, N'500 - 999 دينار كويتي',      N'500 - 999 KD',     0),
+(N'A10', N'3', 3, N'1000 - 1499 دينار كويتي',    N'1000 - 1499 KD',   0),
+(N'A10', N'4', 4, N'1500 - 2000 دينار كويتي',    N'1500 - 2000 KD',   0),
+(N'A10', N'5', 5, N'أكثر من 2000 دينار كويتي',   N'More than 2000 KD', 0),
+-- A13 Staying healthy
+(N'A13', N'1', 1, N'أقوم بإجراء فحوصات طبية بشكل دوري',          N'I frequently get health check-ups', 0),
+(N'A13', N'2', 2, N'أتبع نظاماً غذائياً صحياً',                  N'I follow a healthy diet', 0),
+(N'A13', N'3', 3, N'أتناول المكملات الغذائية (الفيتامينات والمعادن)', N'I take supplements (vitamins, minerals)', 0),
+(N'A13', N'4', 4, N'أنام من 8 إلى 9 ساعات كل ليلة',              N'I get 8-9 hours of sleep every night', 0),
+(N'A13', N'5', 5, N'أحافظ على وزن صحي',                          N'I maintain a healthy weight', 0),
+(N'A13', N'6', 6, N'أمارس الرياضة',                              N'I exercise', 0),
+(N'A13', N'7', 7, N'لا أدخن',                                    N'I don''t smoke', 0),
+(N'A13', N'8', 8, N'أمارس التأمل',                               N'I meditate', 0),
+-- A14 Health information sources
+(N'A14', N'1', 1, N'الأطباء',                     N'Doctors', 0),
+(N'A14', N'2', 2, N'العائلة',                     N'Family', 0),
+(N'A14', N'3', 3, N'الأصدقاء',                    N'Friends', 0),
+(N'A14', N'4', 4, N'المواقع الإلكترونية الطبية',  N'Health-related websites', 0),
+(N'A14', N'5', 5, N'وسائل التواصل الاجتماعي',     N'Social media', 0),
+(N'A14', N'6', 6, N'تطبيقات الذكاء الاصطناعي مثل: شات جي بي تي Chat GPT، جيميني Gemini، كلود Claude، إلخ', N'AI applications (e.g. Chat GPT, Gemini, Claude, etc.)', 0),
+(N'A14', N'7', 7, N'مصادر أخرى',                  N'Other', 1),
+-- A15 Check-up frequency
+(N'A15', N'1', 1, N'كل 3 أشهر',            N'Every 3 months', 0),
+(N'A15', N'2', 2, N'كل 6 أشهر',            N'Every 6 months', 0),
+(N'A15', N'3', 3, N'سنوياً (مرة في السنة)', N'Annually (once a year)', 0),
+(N'A15', N'4', 4, N'كل بضع سنوات',         N'Every few years', 0),
+(N'A15', N'5', 5, N'أراجع الطبيب فقط عندما أكون مريضة أو أحتاج إلى رعاية طبية', N'I only see the doctor when I am sick or need medical care', 0),
+-- A16 Prompt for check-up
+(N'A16', N'1', 1, N'رسالة نصية (SMS) أو مكالمة هاتفية من الطبيب',     N'SMS / phone call from a doctor', 0),
+(N'A16', N'2', 2, N'حملة توعوية على وسائل التواصل الاجتماعي',        N'Social media campaign', 0),
+(N'A16', N'3', 3, N'الخوف من الأمراض الخطيرة أو الاشتباه في وجودها',  N'Fear of serious illness, suspicion of a serious illness', 0),
+(N'A16', N'4', 4, N'تجربة شخص مقرب استهان بالأعراض وكانت النتيجة سيئة', N'The experience of a loved one who underestimated the symptoms, and it didn''t end well', 0),
+(N'A16', N'5', 5, N'نصيحة من أحد أفراد العائلة أو الأصدقاء',          N'Recommendation from a family member or friend', 0),
+(N'A16', N'6', 6, N'وجود تاريخ مرضي عائلي',                         N'Disease in the family', 0),
+(N'A16', N'7', 7, N'أسباب أخرى',                                    N'Other', 1),
+-- B3 Reasons for mammogram (AR order; EN matched/translated)  [CHECK]
+(N'B3', N'1', 1, N'البرامج التثقيفية في وسائل الإعلام',                 N'Educational programs in the media', 0),
+(N'B3', N'2', 2, N'وجود تاريخ عائلي للإصابة بسرطان الثدي',              N'Family history of breast cancer', 0),
+(N'B3', N'3', 3, N'الإيمان بأن الماموجرام يجب أن يُجرى بشكل روتيني',     N'Mammograms should be done routinely', 0),
+(N'B3', N'4', 4, N'معرفة أن الماموجرام مفيد للكشف المبكر عن سرطان الثدي', N'Mammograms are useful for detecting breast cancer', 0),
+(N'B3', N'5', 5, N'وجود كتلة أو تغير غير طبيعي تم اكتشافه بالفحص الذاتي أو الفحص السريري للثدي', N'Abnormality found on self or clinical breast exam', 0),
+(N'B3', N'6', 6, N'نصيحة أو توصية من طبيبي',                            N'Doctor''s recommendation', 0),
+(N'B3', N'7', 7, N'وجود أعراض في الثدي',                                N'Breast symptoms', 0),  -- [EN TRANSLATED]
+-- B4 Reasons for not doing mammogram
+(N'B4', N'1', 1, N'أعتقد أن الماموجرام غير مفيد للكشف عن سرطان الثدي', N'Mammography is not useful for detecting breast cancer', 0),
+(N'B4', N'2', 2, N'لست متأكدة أين يمكنني إجراء أشعة الماموجرام',      N'Not sure where to get a mammogram', 0),
+(N'B4', N'3', 3, N'القلق من التعرض للإشعاع',                          N'Worried about being exposed to radiation', 0),
+(N'B4', N'4', 4, N'الماموجرام مؤلم',                                  N'Mammograms are painful', 0),
+(N'B4', N'5', 5, N'إجراء أشعة الماموجرام أمر محرج',                   N'Getting a mammogram is embarrassing', 0),
+(N'B4', N'6', 6, N'الخوف من النتيجة المحتملة',                        N'Scared of the potential result', 0),
+(N'B4', N'7', 7, N'عدم وجود أي أعراض لسرطان الثدي لدي',               N'Absence of breast cancer symptoms', 0),
+(N'B4', N'8', 8, N'لست في السن المناسبة لإجراء أشعة الماموجرام',       N'I am not old enough for mammography', 0),
+-- B7 BSE frequency
+(N'B7', N'1', 1, N'أبداً',      N'Never', 0),
+(N'B7', N'2', 2, N'أسبوعياً',   N'Weekly', 0),
+(N'B7', N'3', 3, N'شهرياً',     N'Monthly', 0),
+(N'B7', N'4', 4, N'كل 6 أشهر',  N'Every 6 months', 0),
+(N'B7', N'5', 5, N'سنوياً',     N'Annually', 0),
+-- B8 BSE start age
+(N'B8', N'1', 1, N'18 سنة', N'18 years', 0),
+(N'B8', N'2', 2, N'20 سنة', N'20 years', 0),
+(N'B8', N'3', 3, N'35 سنة', N'35 years', 0),
+(N'B8', N'4', 4, N'40 سنة', N'40 years', 0),
+-- B9 Where learned BSE
+(N'B9', N'1', 1, N'من الطبيب', N'My doctor', 0),
+(N'B9', N'2', 2, N'المنشورات التوعوية، اللوحات الإعلانية، الفعاليات، أو الحملات', N'Brochure, billboard, event, campaign', 0),
+(N'B9', N'3', 3, N'من الأقارب أو الأصدقاء',          N'Relative or friend', 0),
+(N'B9', N'4', 4, N'التلفزيون، الراديو، أو الصحف',     N'TV, radio, newspaper', 0),
+(N'B9', N'5', 5, N'وسائل التواصل الاجتماعي',         N'Social media', 0),
+(N'B9', N'6', 6, N'مصادر أخرى',                      N'Other', 1),
+-- B11 How first detected  [EN TRANSLATED]
+(N'B11', N'1', 1, N'الفحص الذاتي للثدي',         N'Breast self-examination', 0),
+(N'B11', N'2', 2, N'الفحص السريري عند الطبيب',   N'Clinical examination by a doctor', 0),
+(N'B11', N'3', 3, N'أشعة الماموجرام',            N'Mammogram', 0),
+(N'B11', N'4', 4, N'السونار (الأشعة فوق الصوتية)', N'Ultrasound', 0),
+(N'B11', N'5', 5, N'الرنين المغناطيسي (MRI)',     N'Magnetic resonance imaging (MRI)', 0),
+-- B20B First invitation age
+(N'B20B', N'1', 1, N'18 سنة', N'18 years', 0),
+(N'B20B', N'2', 2, N'20 سنة', N'20 years', 0),
+(N'B20B', N'3', 3, N'35 سنة', N'35 years', 0),
+(N'B20B', N'4', 4, N'40 سنة', N'40 years', 0),
+(N'B20B', N'5', 5, N'50 سنة', N'50 years', 0),
+(N'B20B', N'6', 6, N'لا أعلم', N'I don''t know', 0),
+-- B24 How found out about program
+(N'B24', N'1', 1, N'بتحويل من طبيبي', N'Referred by my doctor', 0),
+(N'B24', N'2', 2, N'المنشورات التوعوية، اللوحات الإعلانية، الفعاليات، أو الحملات', N'Brochure, billboard, event, campaign', 0),
+(N'B24', N'3', 3, N'من خلال قريب أو صديق',              N'Informed by a relative or friend', 0),
+(N'B24', N'4', 4, N'إعلان في التلفزيون، الراديو، أو الصحف', N'Advertisement on TV, radio, newspaper', 0),
+(N'B24', N'5', 5, N'وسائل التواصل الاجتماعي',           N'Social media', 0),
+(N'B24', N'6', 6, N'مصادر أخرى',                        N'Other', 1),
+-- B25 Preferred learning channels
+(N'B25', N'1', 1, N'الموقع الإلكتروني لوزارة الصحة', N'Ministry of Health''s website', 0),
+(N'B25', N'2', 2, N'رسائل وسائل التواصل الاجتماعي',  N'Social media messages', 0),
+(N'B25', N'3', 3, N'الرسائل النصية القصيرة (SMS)',   N'Text messages', 0),
+(N'B25', N'4', 4, N'ورش العمل والندوات',             N'Workshops and seminars', 0),
+(N'B25', N'5', 5, N'تطبيق سالم',                     N'Salem application', 0),
+(N'B25', N'6', 6, N'طرق أخرى',                       N'Other', 1);
+
+INSERT INTO dbo.breast_cancer_question_option (question_id, value, text_ar, text_en, display_order, is_other)
+SELECT qn.question_id, o.value, o.text_ar, o.text_en, o.ord, o.is_other
+FROM #o o
+JOIN dbo.breast_cancer_question qn ON qn.code = o.code
+JOIN dbo.breast_cancer_survey_step s ON s.step_id = qn.step_id AND s.version_id = @v;
+
+/* ---------- 6. Branching conditions ---------- */
+-- Question-level: (dependent question, parent, operator, expected)
+INSERT INTO dbo.breast_cancer_question_condition (question_id, step_id, parent_question_id, operator, expected_value)
+SELECT dq.question_id, NULL, pq.question_id, c.op, c.expected
+FROM (VALUES
+        (N'B3',  N'B2',  N'EQUALS', N'1'),   -- mammogram reasons  if B2 = Yes
+        (N'B4',  N'B2',  N'EQUALS', N'2'),   -- barriers           if B2 = No
+        (N'B22', N'B21', N'EQUALS', N'1'),   -- booked via app     if aware
+        (N'B24', N'B23', N'EQUALS', N'1')    -- how heard          if done via program
+     ) c(dep, parent, op, expected)
+JOIN dbo.breast_cancer_question dq ON dq.code = c.dep
+JOIN dbo.breast_cancer_survey_step ds ON ds.step_id = dq.step_id AND ds.version_id = @v
+JOIN dbo.breast_cancer_question pq ON pq.code = c.parent
+JOIN dbo.breast_cancer_survey_step ps ON ps.step_id = pq.step_id AND ps.version_id = @v;
+
+-- Step-level: whole step shown only when condition met
+INSERT INTO dbo.breast_cancer_question_condition (question_id, step_id, parent_question_id, operator, expected_value)
+SELECT NULL, s.step_id, pq.question_id, c.op, c.expected
+FROM (VALUES
+        ( 7, N'B5',  N'EQUALS', N'1'),   -- BSE Q6-9         if B5 = Yes
+        ( 9, N'B10', N'EQUALS', N'1'),   -- detection method if diagnosed
+        (17, N'B27', N'EQUALS', N'1')    -- contact details  if agreed
+     ) c(step_no, parent, op, expected)
+JOIN dbo.breast_cancer_survey_step s ON s.version_id = @v AND s.step_no = c.step_no
+JOIN dbo.breast_cancer_question pq ON pq.code = c.parent
+JOIN dbo.breast_cancer_survey_step ps ON ps.step_id = pq.step_id AND ps.version_id = @v;
+
+DROP TABLE #q;
+DROP TABLE #o;
+
+COMMIT TRANSACTION;
+
+/* ---------- Quick check ---------- */
+SELECT s.step_no, s.section_code, COUNT(DISTINCT q.question_id) AS questions, COUNT(o.option_id) AS options
+FROM dbo.breast_cancer_survey_step s
+LEFT JOIN dbo.breast_cancer_question q ON q.step_id = s.step_id
+LEFT JOIN dbo.breast_cancer_question_option o ON o.question_id = q.question_id
+WHERE s.version_id = @v
+GROUP BY s.step_no, s.section_code
+ORDER BY s.step_no;

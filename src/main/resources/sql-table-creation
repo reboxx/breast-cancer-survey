@@ -1,0 +1,218 @@
+/* =========================================================
+   Breast Cancer Survey – Sahel
+   MS SQL Server schema (v1)
+   ========================================================= */
+
+-- CREATE DATABASE BreastCancerSurvey;
+-- GO
+-- USE BreastCancerSurvey;
+-- GO
+
+/* ---------- 1. questionnaire_version ---------- */
+
+CREATE TABLE PostDischargeSurvey.dbo.questionnaire_version (
+    version_id        BIGINT IDENTITY(1,1) NOT NULL,
+    version_no        NVARCHAR(20)   NOT NULL,
+    intro_text_ar     NVARCHAR(MAX)  NULL,
+    intro_text_en     NVARCHAR(MAX)  NULL,
+    thank_you_ar      NVARCHAR(MAX)  NULL,
+    thank_you_en      NVARCHAR(MAX)  NULL,
+    info_link_url     NVARCHAR(500)  NULL,
+    approved_at       DATETIME2(0)   NULL,
+    is_active         BIT            NOT NULL CONSTRAINT DF_qv_is_active DEFAULT (0),
+    created_at        DATETIME2(0)   NOT NULL CONSTRAINT DF_qv_created_at DEFAULT (SYSDATETIME()),
+    CONSTRAINT PK_questionnaire_version PRIMARY KEY (version_id),
+    CONSTRAINT UQ_questionnaire_version_no UNIQUE (version_no)
+);
+GO
+
+/* ---------- 2. campaign ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.campaign (
+    campaign_id       BIGINT IDENTITY(1,1) NOT NULL,
+    code              NVARCHAR(50)   NOT NULL,
+    name_ar           NVARCHAR(200)  NOT NULL,
+    name_en           NVARCHAR(200)  NOT NULL,
+    version_id        BIGINT         NOT NULL,
+    status            NVARCHAR(20)   NOT NULL CONSTRAINT DF_campaign_status DEFAULT (N'DRAFT'),
+    start_date        DATETIME2(0)   NOT NULL,
+    end_date          DATETIME2(0)   NULL,
+    closed_at         DATETIME2(0)   NULL,
+    created_at        DATETIME2(0)   NOT NULL CONSTRAINT DF_campaign_created_at DEFAULT (SYSDATETIME()),
+    updated_at        DATETIME2(0)   NOT NULL CONSTRAINT DF_campaign_updated_at DEFAULT (SYSDATETIME()),
+    CONSTRAINT PK_campaign PRIMARY KEY (campaign_id),
+    CONSTRAINT UQ_campaign_code UNIQUE (code),
+    CONSTRAINT FK_campaign_version FOREIGN KEY (version_id)
+        REFERENCES dbo.questionnaire_version (version_id),
+    CONSTRAINT CK_campaign_status CHECK (status IN (N'DRAFT', N'OPEN', N'CLOSED')),
+    CONSTRAINT CK_campaign_dates CHECK (end_date IS NULL OR end_date > start_date)
+);
+GO
+
+/* ---------- 3. survey_step ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.survey_step (
+    step_id           BIGINT IDENTITY(1,1) NOT NULL,
+    version_id        BIGINT         NOT NULL,
+    step_no           INT            NOT NULL,
+    section_code      NVARCHAR(50)   NOT NULL,          -- e.g. DEMOGRAPHICS, MAMMOGRAM
+    title_ar          NVARCHAR(200)  NOT NULL,
+    title_en          NVARCHAR(200)  NOT NULL,
+    hint_ar           NVARCHAR(500)  NULL,
+    hint_en           NVARCHAR(500)  NULL,
+    button_label_ar   NVARCHAR(50)   NULL,
+    button_label_en   NVARCHAR(50)   NULL,
+    is_intro_step     BIT            NOT NULL CONSTRAINT DF_step_is_intro  DEFAULT (0),
+    is_review_step    BIT            NOT NULL CONSTRAINT DF_step_is_review DEFAULT (0),
+    CONSTRAINT PK_survey_step PRIMARY KEY (step_id),
+    CONSTRAINT UQ_survey_step_version_no UNIQUE (version_id, step_no),
+    CONSTRAINT FK_survey_step_version FOREIGN KEY (version_id)
+        REFERENCES dbo.questionnaire_version (version_id),
+    CONSTRAINT CK_survey_step_no CHECK (step_no >= 1)
+);
+GO
+
+/* ---------- 4. question ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_question (
+    question_id         BIGINT IDENTITY(1,1) NOT NULL,
+    step_id             BIGINT         NOT NULL,
+    code                NVARCHAR(50)   NOT NULL,        -- Sahel control Id / POST Key, e.g. A2, B20A
+    display_order       INT            NOT NULL,
+    label_ar            NVARCHAR(1000) NOT NULL,
+    label_en            NVARCHAR(1000) NOT NULL,
+    hint_ar             NVARCHAR(500)  NULL,
+    hint_en             NVARCHAR(500)  NULL,
+    control_type        NVARCHAR(30)   NOT NULL,
+    is_required         BIT            NOT NULL CONSTRAINT DF_q_is_required  DEFAULT (1),
+    is_disabled         BIT            NOT NULL CONSTRAINT DF_q_is_disabled  DEFAULT (0),
+    is_multiline        BIT            NOT NULL CONSTRAINT DF_q_is_multiline DEFAULT (0),
+    max_length          INT            NULL,
+    validation_regex    NVARCHAR(500)  NULL,
+    validation_msg_ar   NVARCHAR(200)  NULL,
+    validation_msg_en   NVARCHAR(200)  NULL,
+    prefill_source      NVARCHAR(50)   NULL,            -- e.g. SAHEL_AGE, SAHEL_NATIONALITY (read-only prefill)
+    is_sensitive        BIT            NOT NULL CONSTRAINT DF_q_is_sensitive DEFAULT (0),
+    CONSTRAINT PK_question PRIMARY KEY (question_id),
+    CONSTRAINT UQ_question_step_code UNIQUE (step_id, code),
+    CONSTRAINT FK_question_step FOREIGN KEY (step_id)
+        REFERENCES dbo.survey_step (step_id),
+    CONSTRAINT CK_question_control_type CHECK (control_type IN
+        (N'Text', N'Checkbox', N'Dropdown', N'Radio', N'CheckBoxList',
+         N'Hidden', N'Date', N'DataTable'))
+);
+GO
+
+/* ---------- 5. question_option ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_question_option (
+    option_id         BIGINT IDENTITY(1,1) NOT NULL,
+    question_id       BIGINT         NOT NULL,
+    value             NVARCHAR(50)   NOT NULL,          -- stable stored code
+    text_ar           NVARCHAR(500)  NOT NULL,
+    text_en           NVARCHAR(500)  NOT NULL,
+    display_order     INT            NOT NULL,
+    is_other          BIT            NOT NULL CONSTRAINT DF_opt_is_other DEFAULT (0),  -- "Other – please specify"
+    CONSTRAINT PK_question_option PRIMARY KEY (option_id),
+    CONSTRAINT UQ_question_option_value UNIQUE (question_id, value),
+    CONSTRAINT FK_question_option_question FOREIGN KEY (question_id)
+        REFERENCES dbo.question (question_id) ON DELETE CASCADE
+);
+GO
+
+/* ---------- 6. question_condition ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_question_condition (
+    condition_id        BIGINT IDENTITY(1,1) NOT NULL,
+    question_id         BIGINT         NULL,            -- dependent question ...
+    step_id             BIGINT         NULL,            -- ... or a whole dependent step
+    parent_question_id  BIGINT         NOT NULL,
+    operator            NVARCHAR(20)   NOT NULL,
+    expected_value      NVARCHAR(200)  NOT NULL,        -- e.g. '1' or '1,3'
+    CONSTRAINT PK_question_condition PRIMARY KEY (condition_id),
+    CONSTRAINT FK_qc_question FOREIGN KEY (question_id)
+        REFERENCES dbo.question (question_id),
+    CONSTRAINT FK_qc_step FOREIGN KEY (step_id)
+        REFERENCES dbo.survey_step (step_id),
+    CONSTRAINT FK_qc_parent FOREIGN KEY (parent_question_id)
+        REFERENCES dbo.question (question_id),
+    CONSTRAINT CK_qc_operator CHECK (operator IN (N'EQUALS', N'NOT_EQUALS', N'IN', N'CONTAINS')),
+    CONSTRAINT CK_qc_target CHECK (
+        (question_id IS NOT NULL AND step_id IS NULL) OR
+        (question_id IS NULL AND step_id IS NOT NULL))
+);
+GO
+
+/* ---------- 7. survey_response ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_survey_response (
+    response_id         BIGINT IDENTITY(1,1) NOT NULL,
+    participant_ref     CHAR(64)       NOT NULL,        -- SHA-256 (hex) of civil ID + secret salt
+    campaign_id         BIGINT         NOT NULL,
+    version_id          BIGINT         NOT NULL,
+    status              NVARCHAR(20)   NOT NULL CONSTRAINT DF_sr_status DEFAULT (N'DRAFT'),
+    current_step_no     INT            NOT NULL CONSTRAINT DF_sr_step   DEFAULT (1),
+    language            CHAR(2)        NOT NULL CONSTRAINT DF_sr_lang   DEFAULT ('ar'),
+    age_at_start        INT            NOT NULL,
+    age_group           NVARCHAR(10)   NULL,            -- e.g. 35-39
+    governorate         NVARCHAR(50)   NULL,
+    start_channel       NVARCHAR(10)   NOT NULL,
+    submission_channel  NVARCHAR(10)   NULL,
+    created_at          DATETIME2(0)   NOT NULL CONSTRAINT DF_sr_created_at DEFAULT (SYSDATETIME()),
+    updated_at          DATETIME2(0)   NOT NULL CONSTRAINT DF_sr_updated_at DEFAULT (SYSDATETIME()),
+    submitted_at        DATETIME2(0)   NULL,
+    row_ver             ROWVERSION     NOT NULL,
+    CONSTRAINT PK_survey_response PRIMARY KEY (response_id),
+    CONSTRAINT UQ_survey_response_participant_campaign UNIQUE (participant_ref, campaign_id),  -- FR-017
+    CONSTRAINT FK_sr_campaign FOREIGN KEY (campaign_id)
+        REFERENCES dbo.campaign (campaign_id),
+    CONSTRAINT FK_sr_version FOREIGN KEY (version_id)
+        REFERENCES dbo.questionnaire_version (version_id),
+    CONSTRAINT CK_sr_status   CHECK (status IN (N'DRAFT', N'COMPLETED')),
+    CONSTRAINT CK_sr_language CHECK (language IN ('ar', 'en')),
+    CONSTRAINT CK_sr_age      CHECK (age_at_start BETWEEN 35 AND 69),
+    CONSTRAINT CK_sr_start_channel CHECK (start_channel IN (N'SAHEL', N'SALEM')),
+    CONSTRAINT CK_sr_sub_channel   CHECK (submission_channel IS NULL OR submission_channel IN (N'SAHEL', N'SALEM')),
+    CONSTRAINT CK_sr_completed CHECK (
+        (status = N'DRAFT'     AND submitted_at IS NULL     AND submission_channel IS NULL) OR
+        (status = N'COMPLETED' AND submitted_at IS NOT NULL AND submission_channel IS NOT NULL))
+);
+GO
+
+CREATE INDEX IX_sr_campaign_status ON PostDischargeSurvey.dbo.breast_cancer_survey_response (campaign_id, status)
+    INCLUDE (age_group, governorate, submission_channel);
+GO
+
+/* ---------- 8. response_answer ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_response_answer (
+    answer_id         BIGINT IDENTITY(1,1) NOT NULL,
+    response_id       BIGINT         NOT NULL,
+    question_id       BIGINT         NOT NULL,
+    option_value      NVARCHAR(50)   NULL,              -- one row per selected option
+    text_value        NVARCHAR(MAX)  NULL,              -- free text / "other" text
+    answered_at       DATETIME2(0)   NOT NULL CONSTRAINT DF_ra_answered_at DEFAULT (SYSDATETIME()),
+    CONSTRAINT PK_response_answer PRIMARY KEY (answer_id),
+    CONSTRAINT FK_ra_response FOREIGN KEY (response_id)
+        REFERENCES dbo.survey_response (response_id) ON DELETE CASCADE,
+    CONSTRAINT FK_ra_question FOREIGN KEY (question_id)
+        REFERENCES dbo.question (question_id),
+    CONSTRAINT CK_ra_has_value CHECK (option_value IS NOT NULL OR text_value IS NOT NULL)
+);
+GO
+
+CREATE INDEX IX_ra_response ON PostDischargeSurvey.dbo.breast_cancer_response_answer (response_id, question_id);
+CREATE INDEX IX_ra_question_option ON PostDischargeSurvey.dbo.breast_cancer_response_answer (question_id, option_value);
+GO
+
+/* ---------- 9. audit_log ---------- */
+CREATE TABLE PostDischargeSurvey.dbo.breast_cancer_audit_log (
+    audit_id          BIGINT IDENTITY(1,1) NOT NULL,
+    event_type        NVARCHAR(50)   NOT NULL,          -- SUBMIT, CAMPAIGN_CLOSE, EXPORT, ELIGIBILITY_FAIL...
+    participant_ref   CHAR(64)       NULL,
+    campaign_id       BIGINT         NULL,
+    channel           NVARCHAR(10)   NULL,
+    actor             NVARCHAR(100)  NOT NULL,
+    details           NVARCHAR(1000) NULL,              -- never store answer content here
+    created_at        DATETIME2(0)   NOT NULL CONSTRAINT DF_audit_created_at DEFAULT (SYSDATETIME()),
+    CONSTRAINT PK_audit_log PRIMARY KEY (audit_id),
+    CONSTRAINT FK_audit_campaign FOREIGN KEY (campaign_id)
+        REFERENCES dbo.campaign (campaign_id)
+);
+GO
+
+CREATE INDEX IX_audit_event_time ON PostDischargeSurvey.dbo.breast_cancer_audit_log (event_type, created_at);
+GO
